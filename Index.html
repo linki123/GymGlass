@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Para Deborita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink: #ff6fa5;
+    --pink-dark: #e0407e;
+    --yellow: #ffd23f;
+    --yellow-dark: #f7a800;
+    --bg1: #fff0f5;
+    --bg2: #ffe0ec;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+  body {
+    height: 100dvh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    padding: calc(env(safe-area-inset-top,0px) + 9vh) 20px env(safe-area-inset-bottom,0px);
+    text-align: center;
+  }
+
+  h1 {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(2rem, 7vw, 4.2rem);
+    color: var(--pink-dark);
+    margin: 0 0 34px;
+    text-shadow: 0 2px 10px rgba(224,64,126,0.25);
+    z-index: 5;
+    position: relative;
+    animation: floatTitle 4s ease-in-out infinite;
+  }
+  @keyframes floatTitle {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* reserved slot so hiding the button never shifts the title */
+  #btnSlot { position: relative; width: 100%; height: 62px; z-index: 5; }
+
+  #loveBtn {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+    border: none;
+    padding: 16px 38px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(224,64,126,0.45);
+    transition: transform .25s ease, box-shadow .25s ease, opacity .5s ease, visibility .5s;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  #loveBtn:hover { transform: translateX(-50%) scale(1.06); box-shadow: 0 10px 30px rgba(224,64,126,0.55); }
+  #loveBtn:active { transform: translateX(-50%) scale(0.95); }
+  #loveBtn.hide { opacity: 0; visibility: hidden; transform: translateX(-50%) scale(0.6); }
+
+  /* ---------- particle scene ---------- */
+  #scene { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
+
+  .heart {
+    position: absolute;
+    bottom: -40px;
+    font-size: 22px;
+    opacity: 0;
+    animation: riseHeart linear forwards;
+    filter: drop-shadow(0 2px 4px rgba(224,64,126,.4));
+    will-change: transform, opacity;
+  }
+  @keyframes riseHeart {
+    0% { opacity: 0; transform: translateY(0) translateX(0) scale(0.5) rotate(0deg); }
+    10% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-92vh) translateX(var(--drift,0px)) scale(1.05) rotate(var(--spin,20deg)); }
+  }
+
+  .burst-heart {
+    position: fixed; left: 50%; top: 62%; font-size: 24px; opacity: 0; z-index: 6;
+    animation: burst 1.05s ease-out forwards; pointer-events:none;
+  }
+  @keyframes burst {
+    0% { opacity: 1; transform: translate(-50%,-50%) scale(0.4) rotate(0deg); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--bx,0px)), calc(-50% + var(--by,0px))) scale(1.2) rotate(var(--brot,0deg)); }
+  }
+
+  .sparkle {
+    position: fixed; z-index: 6; pointer-events:none; font-size: 16px; opacity: 0;
+    animation: sparkle 1s ease-out forwards;
+  }
+  @keyframes sparkle {
+    0% { opacity: 0; transform: translate(-50%,-50%) scale(0); }
+    30% { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(0.3); }
+  }
+
+  /* flowers that fill the scene around the dog, staying clear of the title */
+  .ground-flower {
+    position: fixed; bottom: 4%; font-size: 22px; z-index: 2; opacity: 0;
+    animation: popFlower .6s ease forwards;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.12));
+  }
+  @keyframes popFlower {
+    0% { opacity: 0; transform: translateY(16px) scale(0.3) rotate(-15deg); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+  }
+  .ground-flower.sway {
+    animation: popFlower .6s ease forwards, flowerSway 3.5s ease-in-out infinite .6s;
+  }
+  @keyframes flowerSway {
+    0%,100% { transform: translateY(0) scale(1) rotate(-4deg); }
+    50% { transform: translateY(0) scale(1) rotate(4deg); }
+  }
+
+  /* ---------- DOG ---------- */
+  #dogStage { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 4; }
+
+  #dogWrap {
+    position: fixed;
+    left: 50%;
+    top: 14%;
+    width: 250px;
+    transform: translate(-50%,-50%) scale(0.14) rotate(0deg);
+    opacity: 0;
+  }
+  #dogWrap.run { animation: approach 1.5s cubic-bezier(.28,.7,.3,1) forwards; }
+
+  @keyframes approach {
+    0%   { top: 13%; transform: translate(-50%,-50%) scale(0.15) rotate(-4deg); opacity: 0; }
+    12%  { opacity: 1; }
+    35%  { top: 34%; transform: translate(-50%,-50%) scale(0.55) rotate(4deg); }
+    55%  { top: 48%; transform: translate(-50%,-50%) scale(0.85) rotate(-3deg); }
+    75%  { top: 60%; transform: translate(-50%,-50%) scale(1.12) rotate(3deg); }
+    90%  { top: 68%; transform: translate(-50%,-50%) scale(1.32) rotate(-1deg); }
+    100% { top: 71%; transform: translate(-50%,-50%) scale(1.4) rotate(0deg); opacity: 1; }
+  }
+
+  #dogSvg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  #tail { transform-box: view-box; transform-origin: 46px 178px; }
+  #dogWrap.arrived #tail { animation: wag 0.5s ease-in-out infinite; }
+  @keyframes wag {
+    0%,100% { transform: rotate(0deg); }
+    50% { transform: rotate(14deg); }
+  }
+
+  #mouthBouquet { transform-box: view-box; transform-origin: 130px 190px; transform: scale(0) rotate(-18deg); }
+  #dogWrap.arrived #mouthBouquet { animation: bloomIn .65s cubic-bezier(.3,1.5,.4,1) forwards .12s; }
+  @keyframes bloomIn {
+    0%   { transform: scale(0) rotate(-22deg); }
+    70%  { transform: scale(1.15) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  #dogWrap.sway #mouthBouquet { animation: swayLoop 2.6s ease-in-out infinite; }
+  @keyframes swayLoop {
+    0%,100% { transform: scale(1) rotate(-3deg); }
+    50% { transform: scale(1) rotate(3deg); }
+  }
+
+  #headGroup { transform-box: view-box; transform-origin: 130px 150px; }
+  #dogWrap.arrived #headGroup { animation: headBob 2.6s ease-in-out infinite; }
+  @keyframes headBob {
+    0%,100% { transform: rotate(0deg); }
+    50% { transform: rotate(-2deg); }
+  }
+
+  footer {
+    position: fixed; bottom: 3%; left: 0; right: 0; text-align: center;
+    font-family: 'Great Vibes', cursive; font-size: 1.15rem; color: var(--pink-dark);
+    opacity: 0; z-index: 5; transition: opacity 1s ease .3s;
+  }
+  footer.show { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+  <h1>Para el amor de mi vida, Deborita</h1>
+
+  <div id="btnSlot">
+    <button id="loveBtn">dale click bb 💛</button>
+  </div>
+
+  <div id="scene"></div>
+
+  <div id="dogStage">
+    <div id="dogWrap">
+      <svg id="dogSvg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <g id="miniFlower">
+            <ellipse cx="0" cy="-8" rx="4.4" ry="8.5" fill="#ffd23f" transform="rotate(0)"/>
+            <ellipse cx="0" cy="-8" rx="4.4" ry="8.5" fill="#ffd23f" transform="rotate(60)"/>
+            <ellipse cx="0" cy="-8" rx="4.4" ry="8.5" fill="#ffd23f" transform="rotate(120)"/>
+            <ellipse cx="0" cy="-8" rx="4.4" ry="8.5" fill="#f7a800" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-8" rx="4.4" ry="8.5" fill="#f7a800" transform="rotate(240)"/>
+            <ellipse cx="0" cy="-8" rx="4.4" ry="8.5" fill="#ffd23f" transform="rotate(300)"/>
+            <circle r="4.2" fill="#8a5a1e"/>
+          </g>
+        </defs>
+
+        <ellipse cx="130" cy="256" rx="88" ry="9" fill="rgba(0,0,0,0.12)"/>
+
+        <ellipse id="tail" cx="46" cy="190" rx="17" ry="25" fill="#c98a3c"/>
+
+        <ellipse cx="130" cy="200" rx="82" ry="64" fill="#e3a765"/>
+        <ellipse cx="130" cy="216" rx="46" ry="40" fill="#f7d9ab"/>
+
+        <ellipse cx="98" cy="246" rx="17" ry="13" fill="#d99b4e"/>
+        <ellipse cx="162" cy="246" rx="17" ry="13" fill="#d99b4e"/>
+
+        <g id="headGroup">
+          <path d="M85,58 C58,52 52,108 78,148 C94,130 96,88 85,58 Z" fill="#c98a3c"/>
+          <path d="M175,58 C202,52 208,108 182,148 C166,130 164,88 175,58 Z" fill="#c98a3c"/>
+
+          <circle cx="130" cy="112" r="56" fill="#eab06e"/>
+
+          <circle cx="90" cy="120" r="9" fill="#ff9db3" opacity="0.35"/>
+          <circle cx="170" cy="120" r="9" fill="#ff9db3" opacity="0.35"/>
+
+          <circle cx="108" cy="102" r="6.5" fill="#3a2a18"/>
+          <circle cx="152" cy="102" r="6.5" fill="#3a2a18"/>
+          <circle cx="110.3" cy="99.3" r="1.8" fill="#fff"/>
+          <circle cx="154.3" cy="99.3" r="1.8" fill="#fff"/>
+
+          <ellipse cx="130" cy="148" rx="32" ry="26" fill="#f7d9ab"/>
+          <ellipse cx="130" cy="142" rx="9" ry="7" fill="#4a2f18"/>
+          <path d="M118,158 Q130,166 142,158" stroke="#7a5230" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <g transform="translate(130,190)">
+            <g id="mouthBouquet">
+              <path d="M0,-2 L-22,32 L22,32 Z" fill="#ffffff" stroke="#ffd0e0" stroke-width="2" opacity="0.95"/>
+              <line x1="0" y1="0" x2="0" y2="26" stroke="#4caf50" stroke-width="2.5"/>
+              <use href="#miniFlower" transform="translate(0,-10) scale(1.25)"/>
+              <use href="#miniFlower" transform="translate(-15,0) scale(1.0)"/>
+              <use href="#miniFlower" transform="translate(15,0) scale(1.0)"/>
+              <use href="#miniFlower" transform="translate(-8,11) scale(0.85)"/>
+              <use href="#miniFlower" transform="translate(9,12) scale(0.85)"/>
+              <use href="#miniFlower" transform="translate(0,-20) scale(0.8)"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <footer id="footerMsg">te amo infinito ✨</footer>
+
+<script>
+const btn = document.getElementById('loveBtn');
+const btnSlot = document.getElementById('btnSlot');
+const scene = document.getElementById('scene');
+const dogWrap = document.getElementById('dogWrap');
+const footerMsg = document.getElementById('footerMsg');
+
+let heartInterval = null;
+let clicked = false;
+let activeHearts = 0;
+const MAX_HEARTS = 9;
+
+const heartEmojis = ['💛','💕','💖','💗','🧡'];
+// girasoles, margaritas y astromelia — con acento amarillo dominante
+const flowerEmojis = ['🌻','🌻','🌼','🌼','🏵️','🌻','🌼','🏵️'];
+
+// título: nunca colocar flores por encima de este % de la pantalla (desde abajo)
+const SAFE_BOTTOM_LIMIT = 76;
+
+function spawnHeart(biasCenter) {
+  if (activeHearts >= MAX_HEARTS) return;
+  activeHearts++;
+  const h = document.createElement('div');
+  h.className = 'heart';
+  h.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
+  const left = biasCenter ? (30 + Math.random()*40) : (8 + Math.random()*84);
+  const duration = 4.5 + Math.random()*2.5;
+  const drift = (Math.random()-0.5)*140;
+  const spin = (Math.random()-0.5)*70;
+  h.style.left = left + '%';
+  h.style.animationDuration = duration + 's';
+  h.style.setProperty('--drift', drift + 'px');
+  h.style.setProperty('--spin', spin + 'deg');
+  h.style.fontSize = (16 + Math.random()*14) + 'px';
+  scene.appendChild(h);
+  setTimeout(()=> { h.remove(); activeHearts--; }, duration*1000 + 150);
+}
+
+function burstEffect() {
+  const n = 22;
+  for (let i=0;i<n;i++){
+    const isHeart = Math.random() > 0.32;
+    const el = document.createElement('div');
+    const angle = Math.random()*Math.PI*2;
+    const dist = 70 + Math.random()*190;
+    const bx = Math.cos(angle)*dist;
+    const by = Math.sin(angle)*dist - 50;
+    el.style.setProperty('--bx', bx+'px');
+    el.style.setProperty('--by', by+'px');
+    el.style.setProperty('--brot', (Math.random()*300-150)+'deg');
+    el.style.left = (49 + Math.random()*2) + '%';
+    el.style.top = (59 + Math.random()*3) + '%';
+    el.style.animationDelay = (Math.random()*0.12)+'s';
+
+    if (isHeart) {
+      el.className = 'burst-heart';
+      el.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
+    } else {
+      el.className = 'sparkle';
+      el.textContent = ['✨','💫','⭐'][Math.floor(Math.random()*3)];
+    }
+    document.body.appendChild(el);
+    setTimeout(()=> el.remove(), 1300);
+  }
+}
+
+function addFlower(left, bottom, size, delay) {
+  const f = document.createElement('div');
+  f.className = 'ground-flower sway';
+  f.textContent = flowerEmojis[Math.floor(Math.random()*flowerEmojis.length)];
+  f.style.left = left + '%';
+  f.style.bottom = bottom + '%';
+  f.style.fontSize = size;
+  f.style.animationDelay = delay + 's';
+  document.body.appendChild(f);
+}
+
+function scatterGroundFlowers() {
+  // cuadrícula que cubre casi toda la pantalla (por debajo del título) con jitter para que
+  // no se vea artificial, y las flores van "naciendo" de abajo hacia arriba.
+  const cols = 11;
+  const rows = 7;
+  const cellW = 100 / cols;
+  const cellH = SAFE_BOTTOM_LIMIT / rows;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const left = c * cellW + (cellW * 0.15) + Math.random() * (cellW * 0.7);
+      const bottom = r * cellH + (cellH * 0.1) + Math.random() * (cellH * 0.8);
+      const size = (5 + Math.random() * 4.5) + 'vmin'; // flores grandes, escaladas a la pantalla
+      const delay = r * 0.12 + Math.random() * 0.35;
+      addFlower(left, bottom, size, delay);
+    }
+  }
+
+  // un puñado extra al azar para que se vea más orgánico, no tan cuadriculado
+  for (let i = 0; i < 18; i++) {
+    const left = 2 + Math.random() * 96;
+    const bottom = Math.random() * SAFE_BOTTOM_LIMIT;
+    const size = (4 + Math.random() * 4) + 'vmin';
+    const delay = 0.3 + Math.random() * 1.2;
+    addFlower(left, bottom, size, delay);
+  }
+}
+
+btn.addEventListener('click', () => {
+  if (clicked) return;
+  clicked = true;
+
+  btn.classList.add('hide');
+  dogWrap.classList.add('run');
+
+  dogWrap.addEventListener('animationend', function onArrive(e){
+    if (e.animationName !== 'approach') return;
+    dogWrap.removeEventListener('animationend', onArrive);
+    dogWrap.classList.add('arrived');
+
+    burstEffect();
+    scatterGroundFlowers();
+    footerMsg.classList.add('show');
+
+    spawnHeart(true);
+    heartInterval = setInterval(()=> spawnHeart(Math.random() > 0.45), 420);
+
+    setTimeout(()=> dogWrap.classList.add('sway'), 650);
+  });
+});
+</script>
+</body>
+</html>
